@@ -136,11 +136,12 @@ This modifies the system to use hand-over-hand locking.
 # Lock-topia's Economy Must Specialize
 
 The citizens are still not living in the riches we promised!
-We must take extreme measures.
+We must take extreme measures to fix the lock-luster economy.
 We don't know what will work, but we do know that the police, and the workers should be allowed to use the freedom list in the their own way.
 The way to boost your economy is to specialize!
 
 *You're hired* to be lock-topia's deep state chief lock-onomist.
+Lock-heed Martin has made a huge amount of contributions to put you in place.
 Don't worry, the masses aren't that angry, and *we offered them cake*, so all is well.
 You're in no way hired as a fall-person!
 
