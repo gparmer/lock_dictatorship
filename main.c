@@ -2,8 +2,8 @@
 //#define DEEPSTATE_LOCK_PHASEI_SEQUENTIAL_TAKES   1
 //#define DEEPSTATE_LOCK_PHASEII_HAND_OVER_HAND    1
 
-#define WORKER_WORK            (32)
-#define WRITER_WORK            WORKER_WORK
+#define WORKER_WORK            32
+#define WRITER_WORK            4
 #define PERSONAL_TIME          10
 //#define DEEPSTATE_LOCK_2NDFRONT_RW                1
 
@@ -17,10 +17,8 @@
 
 struct freedom_node {
 	int ma_freedoms;	/* We provide infinite freedom (modula 2^32)! */
-#ifdef DEEPSTATE_LOCK_2NDFRONT_RW
-#else
 	pthread_mutex_t lock;
-#endif	/* DEEPSTATE_LOCK_2NDFRONT_RW */
+	pthread_rwlock_t rwlock;
 	struct freedom_node *next;
 };
 
@@ -36,6 +34,7 @@ void
 read_lock(struct freedom_node *n)
 {
 #ifdef DEEPSTATE_LOCK_2NDFRONT_RW
+	pthread_rwlock_rdlock(&n->rwlock);
 #else
 	pthread_mutex_lock(&n->lock);
 #endif	/* DEEPSTATE_LOCK_2NDFRONT_RW */
@@ -45,6 +44,7 @@ void
 write_lock(struct freedom_node *n)
 {
 #ifdef DEEPSTATE_LOCK_2NDFRONT_RW
+	pthread_rwlock_wrlock(&n->rwlock);
 #else
 	read_lock(n);		/* 1984 style doublespeak */
 #endif	/* DEEPSTATE_LOCK_2NDFRONT_RW */
@@ -54,6 +54,7 @@ void
 read_unlock(struct freedom_node *n)
 {
 #ifdef DEEPSTATE_LOCK_2NDFRONT_RW
+	pthread_rwlock_unlock(&n->rwlock);
 #else
 	pthread_mutex_unlock(&n->lock);
 #endif	/* DEEPSTATE_LOCK_2NDFRONT_RW */
@@ -62,10 +63,7 @@ read_unlock(struct freedom_node *n)
 void
 write_unlock(struct freedom_node *n)
 {
-#ifdef DEEPSTATE_LOCK_2NDFRONT_RW
-#else
 	read_unlock(n);		/* 1984 style doublespeak */
-#endif	/* DEEPSTATE_LOCK_2NDFRONT_RW */
 }
 
 void
@@ -81,10 +79,8 @@ create_freedom(void)
 	struct freedom_node *n = malloc(sizeof(struct freedom_node));
 
 	if (!n) return NULL;
-#ifdef DEEPSTATE_LOCK_2NDFRONT_RW
-#else
 	pthread_mutex_init(&n->lock, NULL);
-#endif	/* DEEPSTATE_LOCK_2NDFRONT_RW */
+	pthread_rwlock_init(&n->rwlock, NULL);
 
 	n->ma_freedoms = 1;
 
@@ -130,23 +126,41 @@ protect_freedoms(void)
 	write_unlock(&head);
 
 	pthread_mutex_destroy(&n->lock);
+	pthread_rwlock_destroy(&n->rwlock);
 	free(n);
 
 	return;
 }
 
-volatile int work = 0, ensuring_freedoms = 1;
+typedef unsigned long u64_t;
+typedef u64_t ps_tsc_t;
+static inline ps_tsc_t
+ps_tsc(void)
+{
+	unsigned long a, d, c;
+
+	__asm__ __volatile__("rdtsc" : "=a" (a), "=d" (d), "=c" (c) : : );
+
+	return ((u64_t)d << 32) | (u64_t)a;
+}
+
+volatile int ensuring_freedoms = 1;
+volatile u64_t reader_work = 0;
+volatile u64_t writer_work = 0;
 
 /* Yeah, you gotta workworkworkworkwork... */
 void
 work_work(struct freedom_node *n)
 {
 	int i;
+	ps_tsc_t rand = ps_tsc();
+	int bound = rand % (WORKER_WORK * 2);
+
 	(void)n;
 	printf("r");
 
 	/* https://www.youtube.com/watch?v=RP4cD35Xn5E */
-	for (i = 0; i < WORKER_WORK; i++) work++;
+	for (i = 0; i < bound; i++) reader_work++;
 }
 
 void
@@ -156,7 +170,7 @@ moar_freedoms(struct freedom_node *n)
 	printf("w");
 
 	n->ma_freedoms++;
-	for (i = 0; i < WRITER_WORK; i++) work++;
+	for (i = 0; i < WRITER_WORK; i++) writer_work++;
 }
 
 #define ITER 16
@@ -283,27 +297,34 @@ main(int argc, char *argv[])
 {
 	pthread_t updater, worker1, worker2;
 	int i;
+	u64_t start, end;
 	(void)argc; (void)argv;
 
 	head.next = NULL;
 	pthread_mutex_init(&head.lock, NULL);
+	pthread_rwlock_init(&head.rwlock, NULL);
 	for (i = 0; i < 1024; i++) {
 		add_freedoms();
 	}
 
+	start = ps_tsc();
 	if (pthread_create(&updater, NULL, freedom_police, NULL)) panic("pthread_create");
 	if (pthread_create(&worker1, NULL, worker_patriot, NULL)) panic("pthread_create");
 	if (pthread_create(&worker2, NULL, worker_patriot, NULL)) panic("pthread_create");
 	pthread_join(updater, NULL);
 	pthread_join(worker1, NULL);
 	pthread_join(worker2, NULL);
+	end = ps_tsc();
 
 	for (i = 0; i < 1024; i++) {
 		protect_freedoms();
 	}
 	pthread_mutex_destroy(&head.lock);
+	pthread_rwlock_destroy(&head.rwlock);
 
 	printf("\nThe great leader is strong! Mutual exclusion for all!\n");
+	printf("The economy is stronk! We did %lu work per %u cycles!\n",
+	       reader_work / ((end - start) / (256 * 1024)), 256 * 1024);
 
 	return 0;
 }

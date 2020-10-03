@@ -135,4 +135,29 @@ This modifies the system to use hand-over-hand locking.
 
 # Lock-topia's Economy Must Specialize
 
-...
+The citizens are still not living in the riches we promised!
+We must take extreme measures.
+We don't know what will work, but we do know that the police, and the workers should be allowed to use the freedom list in the their own way.
+The way to boost your economy is to specialize!
+
+*You're hired* to be lock-topia's deep state chief lock-onomist.
+Don't worry, the masses aren't that angry, and *we offered them cake*, so all is well.
+You're in no way hired as a fall-person!
+
+Your job is to allow the police and the workers to specialize using read-write locks.
+The `DEEPSTATE_LOCK_2NDFRONT_RW` define allows you to enable the *second front* assault on the dictator.
+
+- **Question 10:**
+	Formulate a set of hypothesis about the following question: What combinations of choosing one of the three lock granularities, mixed with what values of `WORKER_WORK` (correlated with the amount of work done by a reader), and `WRITER_WORK` (correlated with the amount of work done by a writer) will make have the largest benefits for read-write locks?
+- **Question 11:**
+	Run the system with each of the setting you chose.
+	Does the system respond in the manner you expected?
+	What ends up being the setup that most speeds up with read-write locks?
+	Why?
+
+**An important aside about when the program terminates.**
+The program terminates when the writer (the police) has done a specific amount of work.
+Thus, optimizing the readers alone, might not actually make the program faster.
+The print out at the program's termination tells you how much *reader work* is done over some unit of time.
+If you're making more reader work happen over the same amount of time, you've increased efficiency!
+So use *both* the execution time, and the work per unit of time as indicators of success.
