@@ -38,6 +38,8 @@ $ make
 $ time ./bin
 ```
 
+*Note*: If your terminal can't handle this for some reason, it might help to output to file (`$ time ./bin > output`).
+
 Observe the beautiful blocks of contiguous readers (`r`) and writers (`w`)!
 We invited `time` to observe the parade to our magnificence as it carefully watches and tells us how long the procession is.
 
