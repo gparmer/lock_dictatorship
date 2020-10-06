@@ -65,7 +65,7 @@ This is *lock-and-order* so the dictator is happy.
 ## The Deep State: Phase I
 
 The counter (counter) revolution will be messy, but necessary.
-As the dictator struggles for their hard-fought organization, the deep state pushes for mess concessions.
+As the dictator struggles for their hard-fought organization, the deep state pushes for mass concessions.
 Comment out `LOCK_COARSE`, and uncomment `DEEPSTATE_LOCK_PHASEI_SEQUENTIAL_TAKES` (don't run it yet).
 This has the effect of making each traversal of the freedom lists use *fine-grained locking*.
 Each node is locked individually and separately, rather than taking a single lock for the entire list.
