@@ -1,6 +1,6 @@
 # Welcome to the Glorious Lock-topia
 
-> Narrator: The counter-revolution was over-sold.  When the
+> Narrator: The lock-free revolution was over-sold.  When the
 > node-citizenry had to actually write lock-free algorithms, race
 > conditions tore across society, and the ABA problem was the nail in
 > the coffin of the lock-free hopes and dreams. The path to order
